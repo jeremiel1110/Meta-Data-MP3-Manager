@@ -1,10 +1,17 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QListWidget, 
                             QLabel, QPushButton, QGroupBox, QListWidgetItem,
-                            QFrame, QScrollArea)
-from PyQt6.QtCore import Qt
+                            QFrame, QScrollArea, QSizePolicy)
+from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QFont, QPalette, QColor
 from mutagen.easyid3 import EasyID3
 import os
+
+class SmoothScrollArea(QScrollArea):
+    def wheelEvent(self, event):
+        # Reduce scroll speed for smoother experience
+        num_degrees = event.angleDelta().y() / 8
+        num_steps = num_degrees / 15
+        self.verticalScrollBar().setValue(self.verticalScrollBar().value() - int(num_steps * 10))
 
 class AlbumView(QWidget):
     def __init__(self, parent=None):
@@ -48,7 +55,7 @@ class AlbumView(QWidget):
         layout.addWidget(separator)
         
         # Album list in a scroll area
-        scroll_area = QScrollArea()
+        scroll_area = SmoothScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setStyleSheet("""
             QScrollArea {
@@ -109,8 +116,8 @@ class AlbumView(QWidget):
             # Create a widget to hold the album group
             album_widget = QWidget()
             album_layout = QVBoxLayout(album_widget)
-            album_layout.setSpacing(12)
-            album_layout.setContentsMargins(16, 16, 16, 16)
+            album_layout.setSpacing(8)
+            album_layout.setContentsMargins(16, 30, 16, 30)
             album_widget.setStyleSheet('''
                 background: #fff;
                 border: 1.5px solid #d0d7e2;
@@ -120,37 +127,43 @@ class AlbumView(QWidget):
             
             # Add album name label
             album_label = QLabel(album_name)
+            album_label.setMinimumHeight(75)
+            album_label.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
             album_label.setStyleSheet("""
                 font-weight: bold;
-                font-size: 18px;
+                font-size: 20px;
                 color: #111;
-                padding-bottom: 8px;
+                padding: 5px 0px 5px 0px;
                 border-bottom: 1px solid #eee;
             """)
             album_layout.addWidget(album_label)
             
-            # Create a widget and layout for tracks
-            tracks_widget = QWidget()
-            tracks_layout = QVBoxLayout(tracks_widget)
-            tracks_layout.setSpacing(8)
-            tracks_layout.setContentsMargins(12, 12, 12, 12)
-            tracks_widget.setStyleSheet("""
-                background-color: #fff;
-                border: 1px solid #e0e0e0;
-                border-radius: 6px;
-            """)
-            
+            # Add track labels directly to the album layout
             for file in files:
                 title = file.metadata.get('title', os.path.basename(file.path))
+                if not title:
+                    title = "(No Title)" # Keep placeholder for debugging if needed
                 track_label = QLabel(title)
-                track_label.setStyleSheet("color: #000; font-size: 15px; padding: 8px 4px;")
-                tracks_layout.addWidget(track_label)
+                track_label.setMinimumHeight(50)
+                track_label.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
+                track_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.MinimumExpanding)
+                track_label.setStyleSheet("color: #000; font-size: 15px; padding: 6px 12px;")
+                album_layout.addWidget(track_label)
             
-            album_layout.addWidget(tracks_widget)
-            
+            # Calculate total height needed for the album widget content
+            content_height = album_label.sizeHint().height()
+            content_height += album_layout.spacing() * (len(files) > 0)
+            for track_label in album_widget.findChildren(QLabel):
+                 # Exclude the album_label itself from this loop's height calculation
+                if track_label is not album_label:
+                     content_height += track_label.sizeHint().height() + album_layout.spacing()
+
+            # Add margins from the album_layout
+            total_widget_height = content_height + album_layout.contentsMargins().top() + album_layout.contentsMargins().bottom()
+
             # Create list item and set the widget
             item = QListWidgetItem()
-            item.setSizeHint(album_widget.sizeHint())
+            item.setSizeHint(QSize(album_widget.sizeHint().width(), total_widget_height))
             self.album_list.addItem(item)
             self.album_list.setItemWidget(item, album_widget)
     
