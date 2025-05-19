@@ -129,6 +129,12 @@ class MainWindow(QMainWindow):
             QCheckBox::indicator {
                 width: 20px;
                 height: 20px;
+                background-color: #a0a0a0; /* Default grey background for all states */
+                border-radius: 4px; /* Add some rounding */
+            }
+            QCheckBox::indicator:checked {
+                background-color: #4a90e2; /* Blue background when checked */
+                image: url(./icons/check.png); /* Display the check icon */
             }
         """)
         
