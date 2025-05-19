@@ -8,6 +8,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPalette, QColor, QFont
 from mutagen.easyid3 import EasyID3
 from album_view import AlbumView
+from file_renamer import FileRenamer
 
 class MP3File:
     def __init__(self, path):
@@ -285,10 +286,12 @@ class MainWindow(QMainWindow):
         
         # Album view tab
         self.album_view = AlbumView()
+        self.file_renamer = FileRenamer()
         
         # Add tabs
         tab_widget.addTab(file_list_tab, "File List")
         tab_widget.addTab(self.album_view, "Album View")
+        tab_widget.addTab(self.file_renamer, "File Renamer")
         
         layout.addWidget(tab_widget)
     
@@ -372,6 +375,8 @@ class MainWindow(QMainWindow):
         
         # Update album view
         self.album_view.load_albums(self.mp3_files)
+        # Update file renamer view
+        self.file_renamer.load_files(self.mp3_files)
     
     def select_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "Select MP3 Folder")
@@ -386,6 +391,11 @@ class MainWindow(QMainWindow):
             if file.lower().endswith('.mp3'):
                 file_path = os.path.join(folder, file)
                 self.add_mp3_file(file_path)
+        
+        # Update album view
+        self.album_view.load_albums(self.mp3_files)
+        # Update file renamer view
+        self.file_renamer.load_files(self.mp3_files)
     
     def apply_changes(self):
         for i in range(self.file_list.count()):
@@ -409,7 +419,8 @@ class MainWindow(QMainWindow):
                     
                     audio.save()
                 except Exception as e:
-                    print(f"Error saving {mp3_file.path}: {str(e)}")
+                    # print(f"Error saving {mp3_file.path}: {str(e)}")
+                    pass # Suppress error print for now
         
         # Refresh album view after changes
         self.album_view.load_albums(self.mp3_files)

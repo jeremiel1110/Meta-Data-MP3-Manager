@@ -182,4 +182,5 @@ class AlbumView(QWidget):
                             audio['tracknumber'] = str(j + 1)
                             audio.save()
                         except Exception as e:
-                            print(f"Error saving track number for {mp3_file.path}: {str(e)}") 
+                            # print(f"Error saving track number for {mp3_file.path}: {str(e)}")
+                            pass # Suppress error print for now 

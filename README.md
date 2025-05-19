@@ -44,6 +44,18 @@
   - Track numbers are not shown for a cleaner look
   - Once satisfied, click **Accept** to save the track numbers to the metadata of each file
 
+### 🎵 File Renaming Utility
+- **Customizable Renaming Pattern**
+  Rename your MP3 files based on their metadata using a user-defined pattern (e.g., `artist - album - title`).
+- **Preview Changes**
+  See a preview of how your files will be renamed before applying any changes.
+- **Selective Renaming**
+  Choose which files to include in the renaming process using checkboxes.
+- **Apply Renaming**
+  Apply the selected renaming pattern to your files.
+- **Cancel Preview**
+  Discard the current preview and revert to the original file list and selections.
+
 ## 🧩 How It Works
 
 1. **Launch the app** and select a folder containing your MP3 files, or drag MP3 files directly into the window
