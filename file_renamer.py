@@ -43,7 +43,7 @@ class FileRenamer(QWidget):
         pattern_layout = QHBoxLayout()
         pattern_label = QLabel("Pattern:")
         pattern_layout.addWidget(pattern_label)
-        self.pattern_input = QLineEdit("artist - album - title") # Default pattern
+        self.pattern_input = QLineEdit("title - artist") # Default pattern changed
         
         # Remove palette setting as stylesheet should be sufficient and palette caused errors
         # palette = self.pattern_input.palette()
