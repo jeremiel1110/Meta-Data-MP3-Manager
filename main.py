@@ -79,6 +79,8 @@ class MainWindow(QMainWindow):
                 color: #222;
                 font-weight: bold;
                 font-size: 18px;
+                padding-top: 10px;
+                padding-left: 10px;
             }
             QListWidget {
                 background-color: white;
