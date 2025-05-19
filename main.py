@@ -3,8 +3,9 @@ import os
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                             QHBoxLayout, QPushButton, QFileDialog, QListWidget, 
                             QLabel, QLineEdit, QGroupBox, QCheckBox, QTabWidget,
-                            QListWidgetItem)
+                            QListWidgetItem, QFrame)
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPalette, QColor, QFont
 from mutagen.easyid3 import EasyID3
 from album_view import AlbumView
 
@@ -37,7 +38,94 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Meta Data MP3 Manager")
-        self.setMinimumSize(1000, 700)
+        self.setMinimumSize(1200, 800)
+        
+        # Set application style
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: #f0f2f5;
+            }
+            QPushButton {
+                background-color: #4a90e2;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #357abd;
+            }
+            QPushButton:pressed {
+                background-color: #2d6da3;
+            }
+            QLineEdit {
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                background-color: white;
+            }
+            QLineEdit:focus {
+                border: 1px solid #4a90e2;
+            }
+            QGroupBox {
+                background-color: white;
+                border-radius: 8px;
+                padding: 16px;
+                margin-top: 16px;
+            }
+            QGroupBox::title {
+                color: #222;
+                font-weight: bold;
+                font-size: 18px;
+            }
+            QListWidget {
+                background-color: white;
+                border: 1px solid #bbb;
+                border-radius: 4px;
+                padding: 4px;
+            }
+            QListWidget::item {
+                padding: 8px;
+                border-bottom: 1px solid #eee;
+            }
+            QListWidget::item:selected {
+                background-color: #e8f0fe;
+                color: #222;
+            }
+            QTabWidget::pane {
+                border: 1px solid #bbb;
+                border-radius: 4px;
+                background-color: #f8f9fa;
+            }
+            QTabBar::tab {
+                background-color: #e6e9ef;
+                color: #222;
+                padding: 10px 20px;
+                margin-right: 2px;
+                border: 1px solid #bbb;
+                border-bottom: none;
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+                font-size: 16px;
+                font-weight: bold;
+            }
+            QTabBar::tab:selected {
+                background-color: #fff;
+                color: #111;
+                border-bottom: 1px solid #fff;
+            }
+            QLabel {
+                color: #222;
+            }
+            QCheckBox {
+                spacing: 8px;
+            }
+            QCheckBox::indicator {
+                width: 18px;
+                height: 18px;
+            }
+        """)
         
         self.mp3_files = []
         self.setup_ui()
@@ -47,11 +135,31 @@ class MainWindow(QMainWindow):
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
         layout = QVBoxLayout(main_widget)
+        layout.setSpacing(16)
+        layout.setContentsMargins(16, 16, 16, 16)
         
-        # Folder selection
+        # Header
+        header = QWidget()
+        header_layout = QHBoxLayout(header)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+        
+        title = QLabel("Meta Data MP3 Manager")
+        title.setStyleSheet("font-size: 24px; font-weight: bold; color: #333;")
+        header_layout.addWidget(title)
+        
+        # Folder selection button with icon
         folder_btn = QPushButton("Select Folder")
+        folder_btn.setMinimumWidth(150)
         folder_btn.clicked.connect(self.select_folder)
-        layout.addWidget(folder_btn)
+        header_layout.addWidget(folder_btn, alignment=Qt.AlignmentFlag.AlignRight)
+        
+        layout.addWidget(header)
+        
+        # Separator
+        separator = QFrame()
+        separator.setFrameShape(QFrame.Shape.HLine)
+        separator.setStyleSheet("background-color: #ddd;")
+        layout.addWidget(separator)
         
         # Tab widget
         tab_widget = QTabWidget()
@@ -59,57 +167,97 @@ class MainWindow(QMainWindow):
         # File list tab
         file_list_tab = QWidget()
         file_list_layout = QHBoxLayout(file_list_tab)
+        file_list_layout.setSpacing(16)
         
         # Left panel for file list
         left_panel = QWidget()
         left_layout = QVBoxLayout(left_panel)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # File list header
+        file_list_header = QWidget()
+        file_list_header_layout = QHBoxLayout(file_list_header)
+        file_list_header_layout.setContentsMargins(0, 0, 0, 8)
+        
+        file_list_label = QLabel("MP3 Files")
+        file_list_label.setStyleSheet("font-size: 18px; font-weight: bold; color: #222; background: #e6e9ef; padding: 6px 12px; border-radius: 4px;")
+        file_list_header_layout.addWidget(file_list_label)
+        
+        left_layout.addWidget(file_list_header)
+        
+        # Drag-and-drop zone
+        self.drop_zone = QLabel("Drop MP3 files here or use the Select Folder button.")
+        self.drop_zone.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.drop_zone.setStyleSheet('''
+            QLabel {
+                border: 2px dashed #4a90e2;
+                background: #eaf3fb;
+                color: #357abd;
+                font-size: 16px;
+                padding: 24px 0;
+                border-radius: 8px;
+                margin-bottom: 12px;
+            }
+        ''')
+        self.drop_zone.setAcceptDrops(True)
+        left_layout.addWidget(self.drop_zone)
         
         # File list
         self.file_list = QListWidget()
         self.file_list.setAcceptDrops(True)
         self.file_list.dragEnterEvent = self.dragEnterEvent
         self.file_list.dropEvent = self.dropEvent
-        left_layout.addWidget(QLabel("MP3 Files:"))
         left_layout.addWidget(self.file_list)
         
         # Right panel for metadata editing
         right_panel = QWidget()
         right_layout = QVBoxLayout(right_panel)
+        right_layout.setContentsMargins(0, 0, 0, 0)
         
         # Metadata group
         metadata_group = QGroupBox("Edit Metadata")
         metadata_layout = QVBoxLayout(metadata_group)
+        metadata_layout.setSpacing(12)
         
         # Artist
         artist_layout = QHBoxLayout()
-        artist_layout.addWidget(QLabel("Artist:"))
+        artist_label = QLabel("Artist:")
+        artist_label.setMinimumWidth(80)
+        artist_layout.addWidget(artist_label)
         self.artist_input = QLineEdit()
         artist_layout.addWidget(self.artist_input)
         metadata_layout.addLayout(artist_layout)
         
         # Album
         album_layout = QHBoxLayout()
-        album_layout.addWidget(QLabel("Album:"))
+        album_label = QLabel("Album:")
+        album_label.setMinimumWidth(80)
+        album_layout.addWidget(album_label)
         self.album_input = QLineEdit()
         album_layout.addWidget(self.album_input)
         metadata_layout.addLayout(album_layout)
         
         # Year
         year_layout = QHBoxLayout()
-        year_layout.addWidget(QLabel("Year:"))
+        year_label = QLabel("Year:")
+        year_label.setMinimumWidth(80)
+        year_layout.addWidget(year_label)
         self.year_input = QLineEdit()
         year_layout.addWidget(self.year_input)
         metadata_layout.addLayout(year_layout)
         
         # Genre
         genre_layout = QHBoxLayout()
-        genre_layout.addWidget(QLabel("Genre:"))
+        genre_label = QLabel("Genre:")
+        genre_label.setMinimumWidth(80)
+        genre_layout.addWidget(genre_label)
         self.genre_input = QLineEdit()
         genre_layout.addWidget(self.genre_input)
         metadata_layout.addLayout(genre_layout)
         
         # Apply button
         apply_btn = QPushButton("Apply Changes")
+        apply_btn.setMinimumHeight(40)
         apply_btn.clicked.connect(self.apply_changes)
         metadata_layout.addWidget(apply_btn)
         
@@ -132,14 +280,56 @@ class MainWindow(QMainWindow):
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.accept()
+            # Highlight drop zone if dragging over
+            if hasattr(self, 'drop_zone'):
+                self.drop_zone.setStyleSheet('''
+                    QLabel {
+                        border: 2px solid #357abd;
+                        background: #d0e7fa;
+                        color: #357abd;
+                        font-size: 16px;
+                        padding: 24px 0;
+                        border-radius: 8px;
+                        margin-bottom: 12px;
+                    }
+                ''')
         else:
             event.ignore()
+    
+    def dragLeaveEvent(self, event):
+        # Remove highlight from drop zone
+        if hasattr(self, 'drop_zone'):
+            self.drop_zone.setStyleSheet('''
+                QLabel {
+                    border: 2px dashed #4a90e2;
+                    background: #eaf3fb;
+                    color: #357abd;
+                    font-size: 16px;
+                    padding: 24px 0;
+                    border-radius: 8px;
+                    margin-bottom: 12px;
+                }
+            ''')
+        event.accept()
     
     def dropEvent(self, event):
         files = [url.toLocalFile() for url in event.mimeData().urls()]
         for file_path in files:
             if file_path.lower().endswith('.mp3'):
                 self.add_mp3_file(file_path)
+        # Remove highlight from drop zone
+        if hasattr(self, 'drop_zone'):
+            self.drop_zone.setStyleSheet('''
+                QLabel {
+                    border: 2px dashed #4a90e2;
+                    background: #eaf3fb;
+                    color: #357abd;
+                    font-size: 16px;
+                    padding: 24px 0;
+                    border-radius: 8px;
+                    margin-bottom: 12px;
+                }
+            ''')
     
     def add_mp3_file(self, file_path):
         mp3_file = MP3File(file_path)

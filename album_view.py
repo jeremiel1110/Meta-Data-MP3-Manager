@@ -1,6 +1,8 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QListWidget, 
-                            QLabel, QPushButton, QGroupBox, QListWidgetItem)
+                            QLabel, QPushButton, QGroupBox, QListWidgetItem,
+                            QFrame, QScrollArea)
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont, QPalette, QColor
 from mutagen.easyid3 import EasyID3
 import os
 
@@ -12,17 +14,82 @@ class AlbumView(QWidget):
     
     def setup_ui(self):
         layout = QVBoxLayout(self)
+        layout.setSpacing(16)
+        layout.setContentsMargins(0, 0, 0, 0)
         
-        # Album list
-        self.album_list = QListWidget()
-        self.album_list.setDragDropMode(QListWidget.DragDropMode.InternalMove)
-        layout.addWidget(QLabel("Albums:"))
-        layout.addWidget(self.album_list)
+        # Header
+        header = QWidget()
+        header_layout = QHBoxLayout(header)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+        
+        title = QLabel("Album View")
+        title.setStyleSheet("font-size: 20px; font-weight: bold; color: #333; margin-top: 18px;")
+        header_layout.addWidget(title)
         
         # Accept button
-        accept_btn = QPushButton("Accept Track Order")
+        accept_btn = QPushButton("Save Track Order")
+        accept_btn.setMinimumWidth(150)
         accept_btn.clicked.connect(self.accept_track_order)
-        layout.addWidget(accept_btn)
+        header_layout.addWidget(accept_btn, alignment=Qt.AlignmentFlag.AlignRight)
+        
+        layout.addWidget(header)
+        
+        # Add instructional description
+        description = QLabel("Drag and drop tracks within each album to reorder them. Click 'Save Track Order' to update track numbers in the files.")
+        description.setWordWrap(True)
+        description.setStyleSheet("color: #444; font-size: 14px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 4px; padding: 8px 12px; margin-bottom: 8px;")
+        layout.addWidget(description)
+        
+        # Separator
+        separator = QFrame()
+        separator.setFrameShape(QFrame.Shape.HLine)
+        separator.setStyleSheet("background-color: #ddd;")
+        layout.addWidget(separator)
+        
+        # Album list in a scroll area
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background-color: transparent;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #f0f2f5;
+                width: 10px;
+                margin: 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #c1c1c1;
+                min-height: 20px;
+                border-radius: 5px;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+        """)
+        
+        self.album_list = QListWidget()
+        self.album_list.setDragDropMode(QListWidget.DragDropMode.InternalMove)
+        self.album_list.setStyleSheet("""
+            QListWidget {
+                background-color: transparent;
+                border: none;
+            }
+            QListWidget::item {
+                background-color: white;
+                border-radius: 8px;
+                margin: 8px;
+                padding: 8px;
+            }
+            QListWidget::item:selected {
+                background-color: #e8f0fe;
+            }
+        """)
+        
+        scroll_area.setWidget(self.album_list)
+        layout.addWidget(scroll_area)
     
     def load_albums(self, mp3_files):
         self.mp3_files = mp3_files
@@ -41,27 +108,49 @@ class AlbumView(QWidget):
             # Create a widget to hold the album group
             album_widget = QWidget()
             album_layout = QVBoxLayout(album_widget)
+            album_layout.setSpacing(12)
+            album_layout.setContentsMargins(16, 16, 16, 16)
             
             # Add album name label
             album_label = QLabel(album_name)
-            album_label.setStyleSheet("font-weight: bold; font-size: 14px;")
+            album_label.setStyleSheet("""
+                font-weight: bold;
+                font-size: 16px;
+                color: #333;
+                padding-bottom: 8px;
+                border-bottom: 1px solid #eee;
+            """)
             album_layout.addWidget(album_label)
             
             # Create list widget for tracks
             track_list = QListWidget()
             track_list.setDragDropMode(QListWidget.DragDropMode.InternalMove)
+            track_list.setStyleSheet("""
+                QListWidget {
+                    background-color: #f8f9fa;
+                    border: 1px solid #eee;
+                    border-radius: 4px;
+                }
+                QListWidget::item {
+                    padding: 8px;
+                    border-bottom: 1px solid #eee;
+                }
+                QListWidget::item:selected {
+                    background-color: #e8f0fe;
+                }
+            """)
             
             for file in files:
                 title = file.metadata.get('title', os.path.basename(file.path))
                 item = QListWidgetItem(title)
                 font = item.font()
-                font.setPointSize(14)  # Keep larger font size
+                font.setPointSize(11)
                 item.setFont(font)
                 track_list.addItem(item)
             
-            # Resize track_list to fit all items (no scroll bar for typical album sizes)
+            # Resize track_list to fit all items
             row_height = track_list.sizeHintForRow(0) if track_list.count() > 0 else 24
-            total_height = row_height * track_list.count() + 6  # 6 for padding/border
+            total_height = row_height * track_list.count() + 6
             track_list.setFixedHeight(total_height)
             
             album_layout.addWidget(track_list)
