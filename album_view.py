@@ -144,10 +144,10 @@ class AlbumView(QWidget):
                 if not title:
                     title = "(No Title)" # Keep placeholder for debugging if needed
                 track_label = QLabel(title)
-                track_label.setMinimumHeight(50)
+                track_label.setMinimumHeight(60)
                 track_label.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
                 track_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.MinimumExpanding)
-                track_label.setStyleSheet("color: #000; font-size: 15px; padding: 6px 12px;")
+                track_label.setStyleSheet("color: #000; font-size: 15px; padding: 10px 12px;")
                 album_layout.addWidget(track_label)
             
             # Calculate total height needed for the album widget content
