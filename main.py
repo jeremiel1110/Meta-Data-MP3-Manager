@@ -3,7 +3,7 @@ import os
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                             QHBoxLayout, QPushButton, QFileDialog, QListWidget, 
                             QLabel, QLineEdit, QGroupBox, QCheckBox, QTabWidget,
-                            QListWidgetItem, QFrame)
+                            QListWidgetItem, QFrame, QMessageBox)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPalette, QColor, QFont
 from mutagen.easyid3 import EasyID3
@@ -341,6 +341,18 @@ class MainWindow(QMainWindow):
             ''')
     
     def add_mp3_file(self, file_path):
+        # Check for duplicates before adding
+        for existing_file in self.mp3_files:
+            if existing_file.path == file_path:
+                msg_box = QMessageBox(self) # Create a QMessageBox instance
+                msg_box.setIcon(QMessageBox.Icon.Warning)
+                msg_box.setWindowTitle("Duplicate File")
+                msg_box.setText(f"File with path:\n{file_path}\nis already loaded.")
+                # Apply stylesheet for white mode
+                msg_box.setStyleSheet("QMessageBox { background-color: white; color: black; } QLabel { color: black; } QPushButton { background-color: #4a90e2; color: white; border: none; padding: 5px 10px; border-radius: 3px; }")
+                msg_box.exec() # Use exec() to show the dialog
+                return # Stop adding the file if it's a duplicate
+                
         mp3_file = MP3File(file_path)
         self.mp3_files.append(mp3_file)
         
