@@ -86,8 +86,11 @@ class MainWindow(QMainWindow):
                 padding: 4px;
             }
             QListWidget::item {
-                padding: 8px;
+                padding: 12px 8px;
                 border-bottom: 1px solid #eee;
+                font-size: 16px;
+                background: #f7faff;
+                color: #000;
             }
             QListWidget::item:selected {
                 background-color: #e8f0fe;
@@ -120,10 +123,12 @@ class MainWindow(QMainWindow):
             }
             QCheckBox {
                 spacing: 8px;
+                font-size: 16px;
+                font-weight: 500;
             }
             QCheckBox::indicator {
-                width: 18px;
-                height: 18px;
+                width: 20px;
+                height: 20px;
             }
         """)
         
@@ -147,11 +152,15 @@ class MainWindow(QMainWindow):
         title.setStyleSheet("font-size: 24px; font-weight: bold; color: #333;")
         header_layout.addWidget(title)
         
+        # Spacer to push button to the right
+        header_layout.addStretch(1)
+        
         # Folder selection button with icon
-        folder_btn = QPushButton("Select Folder")
-        folder_btn.setMinimumWidth(150)
-        folder_btn.clicked.connect(self.select_folder)
-        header_layout.addWidget(folder_btn, alignment=Qt.AlignmentFlag.AlignRight)
+        self.folder_btn = QPushButton("Select Folder")
+        self.folder_btn.setMinimumWidth(150)
+        self.folder_btn.setStyleSheet("margin-right: 18px; margin-top: 6px; margin-bottom: 6px;")
+        self.folder_btn.clicked.connect(self.select_folder)
+        header_layout.addWidget(self.folder_btn, alignment=Qt.AlignmentFlag.AlignRight)
         
         layout.addWidget(header)
         
@@ -339,6 +348,7 @@ class MainWindow(QMainWindow):
         item = QListWidgetItem()
         checkbox = QCheckBox(os.path.basename(file_path))
         checkbox.setChecked(True)
+        checkbox.setStyleSheet('color: #000; font-size: 16px; font-weight: 500;')
         self.file_list.addItem(item)
         self.file_list.setItemWidget(item, checkbox)
         

@@ -29,6 +29,7 @@ class AlbumView(QWidget):
         # Accept button
         accept_btn = QPushButton("Save Track Order")
         accept_btn.setMinimumWidth(150)
+        accept_btn.setStyleSheet("margin-right: 18px; margin-top: 6px; margin-bottom: 6px;")
         accept_btn.clicked.connect(self.accept_track_order)
         header_layout.addWidget(accept_btn, alignment=Qt.AlignmentFlag.AlignRight)
         
@@ -110,50 +111,42 @@ class AlbumView(QWidget):
             album_layout = QVBoxLayout(album_widget)
             album_layout.setSpacing(12)
             album_layout.setContentsMargins(16, 16, 16, 16)
+            album_widget.setStyleSheet('''
+                background: #fff;
+                border: 1.5px solid #d0d7e2;
+                border-radius: 10px;
+                margin-bottom: 18px;
+            ''')
             
             # Add album name label
             album_label = QLabel(album_name)
             album_label.setStyleSheet("""
                 font-weight: bold;
-                font-size: 16px;
-                color: #333;
+                font-size: 18px;
+                color: #111;
                 padding-bottom: 8px;
                 border-bottom: 1px solid #eee;
             """)
             album_layout.addWidget(album_label)
             
-            # Create list widget for tracks
-            track_list = QListWidget()
-            track_list.setDragDropMode(QListWidget.DragDropMode.InternalMove)
-            track_list.setStyleSheet("""
-                QListWidget {
-                    background-color: #f8f9fa;
-                    border: 1px solid #eee;
-                    border-radius: 4px;
-                }
-                QListWidget::item {
-                    padding: 8px;
-                    border-bottom: 1px solid #eee;
-                }
-                QListWidget::item:selected {
-                    background-color: #e8f0fe;
-                }
+            # Create a widget and layout for tracks
+            tracks_widget = QWidget()
+            tracks_layout = QVBoxLayout(tracks_widget)
+            tracks_layout.setSpacing(8)
+            tracks_layout.setContentsMargins(12, 12, 12, 12)
+            tracks_widget.setStyleSheet("""
+                background-color: #fff;
+                border: 1px solid #e0e0e0;
+                border-radius: 6px;
             """)
             
             for file in files:
                 title = file.metadata.get('title', os.path.basename(file.path))
-                item = QListWidgetItem(title)
-                font = item.font()
-                font.setPointSize(11)
-                item.setFont(font)
-                track_list.addItem(item)
+                track_label = QLabel(title)
+                track_label.setStyleSheet("color: #000; font-size: 15px; padding: 8px 4px;")
+                tracks_layout.addWidget(track_label)
             
-            # Resize track_list to fit all items
-            row_height = track_list.sizeHintForRow(0) if track_list.count() > 0 else 24
-            total_height = row_height * track_list.count() + 6
-            track_list.setFixedHeight(total_height)
-            
-            album_layout.addWidget(track_list)
+            album_layout.addWidget(tracks_widget)
             
             # Create list item and set the widget
             item = QListWidgetItem()
