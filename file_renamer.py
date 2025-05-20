@@ -104,7 +104,7 @@ class FileRenamer(QWidget):
     def preview_rename(self):
         raw_pattern = self.pattern_input.text()
         # Automatically add curly braces around known tags
-        pattern = raw_pattern.replace("artist", "{artist}").replace("album", "{album}").replace("year", "{year}").replace("genre", "{genre}").replace("title", "{title}")
+        pattern = raw_pattern.replace("artist", "{artist}").replace("album", "{album}").replace("year", "{year}").replace("genre", "{genre}").replace("title", "{title}").replace("track", "{tracknumber}")
         
         # --- Start: Get checked items before clearing ---
         files_to_preview_indices = []
@@ -132,7 +132,8 @@ class FileRenamer(QWidget):
                     album=mp3_file.metadata.get('album', 'Unknown Album'),
                     year=mp3_file.metadata.get('year', 'Unknown Year'),
                     genre=mp3_file.metadata.get('genre', 'Unknown Genre'),
-                    title=mp3_file.metadata.get('title', 'Unknown Title')
+                    title=mp3_file.metadata.get('title', 'Unknown Title'),
+                    tracknumber=mp3_file.metadata.get('tracknumber', '') # Include tracknumber in format
                 ) + os.path.splitext(original_name)[1] # Keep original extension
                 
                 # Simple validation for invalid characters (platform dependent, but covers common issues)
@@ -194,14 +195,15 @@ class FileRenamer(QWidget):
                 # Re-generate the new name to ensure consistency with preview
                 raw_pattern = self.pattern_input.text()
                 # Automatically add curly braces around known tags
-                pattern = raw_pattern.replace("artist", "{artist}").replace("album", "{album}").replace("year", "{year}").replace("genre", "{genre}").replace("title", "{title}")
+                pattern = raw_pattern.replace("artist", "{artist}").replace("album", "{album}").replace("year", "{year}").replace("genre", "{genre}").replace("title", "{title}").replace("track", "{tracknumber}")
                 
                 new_name = pattern.format(
                     artist=mp3_file.metadata.get('artist', 'Unknown Artist'),
                     album=mp3_file.metadata.get('album', 'Unknown Album'),
                     year=mp3_file.metadata.get('year', 'Unknown Year'),
                     genre=mp3_file.metadata.get('genre', 'Unknown Genre'),
-                    title=mp3_file.metadata.get('title', 'Unknown Title')
+                    title=mp3_file.metadata.get('title', 'Unknown Title'),
+                    tracknumber=mp3_file.metadata.get('tracknumber', '') # Include tracknumber in format
                 ) + os.path.splitext(original_name)[1]
                 
                 invalid_chars = '<|>|:|"|/|\\|\?|\*'

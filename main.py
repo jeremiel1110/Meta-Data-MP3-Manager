@@ -24,7 +24,8 @@ class MP3File:
                 'album': audio.get('album', [''])[0],
                 'year': audio.get('date', [''])[0],
                 'genre': audio.get('genre', [''])[0],
-                'title': audio.get('title', [''])[0]
+                'title': audio.get('title', [''])[0],
+                'tracknumber': audio.get('tracknumber', [''])[0]
             }
         except:
             return {
